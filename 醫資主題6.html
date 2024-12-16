@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGS to FHIR JSON Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">NGS to FHIR JSON Interface</h1>
+        <form id="fhirForm">
+
+            <!-- Patient Information -->
+            <div class="form-section">
+                <h2>Patient Information</h2>
+                <div class="mb-3">
+                    <label for="patientName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="patientName" placeholder="Enter patient name">
+                </div>
+                <div class="mb-3">
+                    <label for="patientAge" class="form-label">Age</label>
+                    <input type="number" class="form-control" id="patientAge" placeholder="Enter patient age">
+                </div>
+                <div class="mb-3">
+                    <label for="patientGender" class="form-label">Gender</label>
+                    <select class="form-select" id="patientGender">
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Specimen Information -->
+            <div class="form-section">
+                <h2>Specimen Information</h2>
+                <div class="mb-3">
+                    <label for="specimenId" class="form-label">Specimen ID</label>
+                    <input type="text" class="form-control" id="specimenId" placeholder="Enter specimen ID">
+                </div>
+                <div class="mb-3">
+                    <label for="specimenType" class="form-label">Type</label>
+                    <input type="text" class="form-control" id="specimenType" placeholder="Enter specimen type">
+                </div>
+                <div class="mb-3">
+                    <label for="collectionDate" class="form-label">Collection Date</label>
+                    <input type="date" class="form-control" id="collectionDate">
+                </div>
+            </div>
+
+            <!-- Genomic Data -->
+            <div class="form-section">
+                <h2>Genomic Data</h2>
+                <div class="mb-3">
+                    <label for="geneName" class="form-label">Gene Name</label>
+                    <input type="text" class="form-control" id="geneName" placeholder="Enter gene name">
+                </div>
+                <div class="mb-3">
+                    <label for="variantType" class="form-label">Variant Type</label>
+                    <input type="text" class="form-control" id="variantType" placeholder="Enter variant type">
+                </div>
+                <div class="mb-3">
+                    <label for="sequencePosition" class="form-label">Sequence Position</label>
+                    <input type="text" class="form-control" id="sequencePosition" placeholder="Enter sequence position">
+                </div>
+            </div>
+
+            <!-- Preview and Submit -->
+            <div class="form-section">
+                <h2>Preview & Generate FHIR JSON</h2>
+                <button type="button" class="btn btn-primary mb-3" id="generateJson">Generate JSON</button>
+                <pre id="jsonOutput" class="p-3 bg-light border rounded"></pre>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('generateJson').addEventListener('click', () => {
+            const patientName = document.getElementById('patientName').value;
+            const patientAge = document.getElementById('patientAge').value;
+            const patientGender = document.getElementById('patientGender').value;
+            const specimenId = document.getElementById('specimenId').value;
+            const specimenType = document.getElementById('specimenType').value;
+            const collectionDate = document.getElementById('collectionDate').value;
+            const geneName = document.getElementById('geneName').value;
+            const variantType = document.getElementById('variantType').value;
+            const sequencePosition = document.getElementById('sequencePosition').value;
+
+            const fhirJson = {
+                resourceType: "Observation",
+                id: "example",
+                status: "final",
+                code: {
+                    coding: [
+                        {
+                            system: "http://loinc.org",
+                            code: "53041-0",
+                            display: "Genetic variant assessment"
+                        }
+                    ]
+                },
+                subject: {
+                    reference: `Patient/${patientName}`
+                },
+                specimen: {
+                    reference: `Specimen/${specimenId}`
+                },
+                valueCodeableConcept: {
+                    coding: [
+                        {
+                            system: "http://sequenceontology.org",
+                            code: "SO:0001234",
+                            display: variantType
+                        }
+                    ]
+                },
+                extension: [
+                    {
+                        url: "http://hl7.org/fhir/StructureDefinition/geneticsGene",
+                        valueString: geneName
+                    },
+                    {
+                        url: "http://hl7.org/fhir/StructureDefinition/geneticsGenomeBuild",
+                        valueString: sequencePosition
+                    }
+                ]
+            };
+
+            document.getElementById('jsonOutput').textContent = JSON.stringify(fhirJson, null, 2);
+        });
+    </script>
+</body>
+</html>
